@@ -1,12 +1,12 @@
 ﻿namespace ProjectDifficultyCalculator.Logic
 {
-    public struct FactorInfo
+    public struct FactorInfo<T>
     {
         public readonly string ShortName;
         public readonly string FullName;
-        public readonly double[] Coefficients;
+        public readonly T[] Coefficients;
 
-        public FactorInfo(string shortName, string fullName, double[] coefficients)
+        public FactorInfo(string shortName, string fullName, T[] coefficients)
         {
             ShortName = shortName;
             FullName = fullName;
