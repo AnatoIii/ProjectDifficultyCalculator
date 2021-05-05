@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectDifficultyCalculator", "ProjectDifficultyCalculator\ProjectDifficultyCalculator.csproj", "{4870F9C0-EDE3-4618-9816-B403759C4F6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectDifficultyCalculator", "ProjectDifficultyCalculator\ProjectDifficultyCalculator.csproj", "{4870F9C0-EDE3-4618-9816-B403759C4F6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectDifficultyCalculator.Logic", "ProjectDifficultyCalculator.Logic\ProjectDifficultyCalculator.Logic.csproj", "{EFDD179D-ADAB-483F-A39E-B3F51C455ACB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectDifficultyCalculator.Logic", "ProjectDifficultyCalculator.Logic\ProjectDifficultyCalculator.Logic.csproj", "{EFDD179D-ADAB-483F-A39E-B3F51C455ACB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectDifficultyCalculator.Tests", "ProjectDifficultyCalculator.Tests\ProjectDifficultyCalculator.Tests.csproj", "{5D941F18-8410-437D-A00B-7DE5D98CDB2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{EFDD179D-ADAB-483F-A39E-B3F51C455ACB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFDD179D-ADAB-483F-A39E-B3F51C455ACB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFDD179D-ADAB-483F-A39E-B3F51C455ACB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D941F18-8410-437D-A00B-7DE5D98CDB2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D941F18-8410-437D-A00B-7DE5D98CDB2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D941F18-8410-437D-A00B-7DE5D98CDB2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D941F18-8410-437D-A00B-7DE5D98CDB2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
