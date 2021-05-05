@@ -2,15 +2,20 @@
 {
     public struct FactorInfo
     {
-        public readonly string Name;
-        public readonly string Description;
+        public readonly string ShortName;
+        public readonly string FullName;
         public readonly double[] Coefficients;
 
-        public FactorInfo(string name, string description, double[] coefficients)
+        public FactorInfo(string shortName, string fullName, double[] coefficients)
         {
-            Name = name;
-            Description = description;
+            ShortName = shortName;
+            FullName = fullName;
             Coefficients = coefficients;
+        }
+
+        public override string ToString()
+        {
+            return ShortName + ':' + string.Join(',', Coefficients);
         }
     }
 }
