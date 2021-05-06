@@ -14,7 +14,7 @@ namespace ProjectDifficultyCalculator.Logic.COCOMO
 
         public double CalculateScaleCoefficientE(params double[] scaleFactors)
         {
-            return Properties.B + scaleFactors.Aggregate(0.01, (current, sf) => current * sf);
+            return Properties.B + 0.01 * scaleFactors.Sum();
         }
 
         public double CalculateCorrectionFactorM(params double[] costDrivers)
