@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
 
-namespace ProjectDifficultyCalculator.Serializers.JSON
+namespace ProjectDifficultyCalculator.Serializers
 {
     public class JsonFileSerializer<T> : IFileSerializer<T>
     {
