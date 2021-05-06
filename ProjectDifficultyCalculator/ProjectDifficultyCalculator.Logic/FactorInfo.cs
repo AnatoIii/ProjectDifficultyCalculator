@@ -6,7 +6,7 @@
         public readonly string FullName;
         public readonly T[] Coefficients;
 
-        public FactorInfo(string shortName, string fullName, T[] coefficients)
+        public FactorInfo(string shortName, string fullName, params T[] coefficients)
         {
             ShortName = shortName;
             FullName = fullName;
