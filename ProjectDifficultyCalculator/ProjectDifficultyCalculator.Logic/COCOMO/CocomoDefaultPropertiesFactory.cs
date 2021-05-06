@@ -47,7 +47,7 @@
                 new FactorInfo<double>("DEXT", "Divisions External Influence", double.NaN, double.NaN, 1.0, double.NaN, double.NaN, double.NaN),
                 new FactorInfo<double>("MEXT", "Market External Influence", double.NaN, double.NaN, 1.0, double.NaN, double.NaN, double.NaN),
                 new FactorInfo<double>("CEXT", "Customer External Influence", double.NaN, double.NaN, 1.0, double.NaN, double.NaN, double.NaN),
-                new FactorInfo<double>("GEXT", "Government External Influence", double.NaN, double.NaN, 1.0, double.NaN, double.NaN, double.NaN),
+                new FactorInfo<double>("GEXT", "Government External Influence", double.NaN, double.NaN, 1.0, double.NaN, double.NaN, double.NaN)
             };
 
             return new CocomoProperties(a, b, scaleFactors, costDrivers);
