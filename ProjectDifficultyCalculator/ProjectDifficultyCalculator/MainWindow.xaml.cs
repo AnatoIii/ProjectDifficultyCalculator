@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,21 +23,23 @@ namespace ProjectDifficultyCalculator
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<SelectorControl> costDriverControls { get; set; }
-        private List<SelectorControl> scaleFactorsControls { get; set; }
-        private int _linesAmount = 0;
+        private List<SelectorControl> CostDriverControls { get; set; }
+        private List<SelectorControl> ScaleFactorsControls { get; set; }
+        private CocomoCalculator CocomoCalculator { get; set; }
+        private CocomoProperties CocomoProperties => CocomoCalculator.Properties;
 
         public MainWindow()
         {
-            costDriverControls = new List<SelectorControl>();
-            scaleFactorsControls = new List<SelectorControl>();
+            CostDriverControls = new List<SelectorControl>();
+            ScaleFactorsControls = new List<SelectorControl>();
             InitializeComponent();
             DataContext = this;
-            var values = CocomoDefaultPropertiesFactory.Create();
+            var properties = CocomoDefaultPropertiesFactory.Create();
+            CocomoCalculator = new CocomoCalculator(properties);
 
-            int j = 0;
-            foreach (var costDriver in values.ScaleFactors)
+            for (var i = 0; i < properties.ScaleFactors.Length; i++)
             {
+                var costDriver = properties.ScaleFactors[i];
                 var selectorControl = new SelectorControl()
                 {
                     Id = costDriver.ShortName,
@@ -44,15 +47,15 @@ namespace ProjectDifficultyCalculator
                     Title = costDriver.ShortName
                 };
 
-                if (j % 3 == 0)
+                if (i % 3 == 0)
                 {
                     scaleFactorsPanel1.Children.Add(selectorControl);
                 }
-                else if (j % 3 == 1)
+                else if (i % 3 == 1)
                 {
                     scaleFactorsPanel2.Children.Add(selectorControl);
                 }
-                else if (j % 3 == 2)
+                else if (i % 3 == 2)
                 {
                     scaleFactorsPanel3.Children.Add(selectorControl);
                 }
@@ -63,13 +66,12 @@ namespace ProjectDifficultyCalculator
                 //    _ => panel3.Children.Add(selectorControl)
                 //};
 
-                scaleFactorsControls.Add(selectorControl);
-                j++;
+                ScaleFactorsControls.Add(selectorControl);
             }
 
-            int i = 0;
-            foreach (var costDriver in values.CostDrivers)
+            for (var i = 0; i < properties.CostDrivers.Length; i++)
             {
+                var costDriver = properties.CostDrivers[i];
                 var selectorControl = new SelectorControl()
                 {
                     Id = costDriver.ShortName,
@@ -96,9 +98,9 @@ namespace ProjectDifficultyCalculator
                 //    _ => panel3.Children.Add(selectorControl)
                 //};
 
-                costDriverControls.Add(selectorControl);
-                i++;
+                CostDriverControls.Add(selectorControl);
             }
+
             //var selectorControl = new SelectorControl()
             //{
             //    ControlTooltip = "Test value",
@@ -107,27 +109,55 @@ namespace ProjectDifficultyCalculator
             //this.panel2.Children.Add(selectorControl);
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void ShowError(string message)
         {
-            // Calculate result here
-            var results = costDriverControls.Select(el => (el.Id, el.GetValue())).ToArray();
+            MessageBox.Show(this, message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private void CalculateButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!uint.TryParse(slocTextBox.Text, out var sloc))
+            {
+                ShowError("Invalid SLOC value!");
+                return;
+            }
+
+            if (!double.TryParse(brakTextBox.Text, out var brak) || brak < 0 || brak > 100)
+            {
+                ShowError("Invalid BRAK value!" + Environment.NewLine + "BRAK must be >= 0 and <= 100.");
+                return;
+            }
+
+            var scaleFactors = ScaleFactorsControls.Select(c => c.GetValue())
+                .Zip(CocomoProperties.ScaleFactors)
+                .Select(pair => pair.Second.Coefficients[pair.First])
+                .ToArray();
+
+            var costDrivers = CostDriverControls.Select(c => c.GetValue())
+                .Zip(CocomoProperties.CostDrivers)
+                .Select(pair => pair.Second.Coefficients[pair.First])
+                .ToArray();
+
+            var result = CocomoCalculator.CalculateComplexityPM(sloc, brak, scaleFactors, costDrivers);
+            MessageBox.Show(this, "Result: " + result + " person-months.", "Difficulty", MessageBoxButton.OK);
         }
 
         private void ButtonFP_Click(object sender, RoutedEventArgs e)
         {
             // In reality something should happen here, but I'm not sure what
+            // TODO
         }
 
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void TextBox_IntegerValidation(object sender, TextCompositionEventArgs e)
         {
-            if (int.TryParse(textBox1.Text, out int value))
-            {
-                _linesAmount = value;
-            }
-            else
-            {
-                textBox1.Text = _linesAmount.ToString();
-            }
+            var regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void TextBox_DoubleValidation(object sender, TextCompositionEventArgs e)
+        {
+            var regex = new Regex("[^0-9.,]+");
+            e.Handled = regex.IsMatch(e.Text);
         }
     }
 }
