@@ -6,4 +6,16 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="CustomControls\questionMark.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProjectDifficultyCalculator.Logic\ProjectDifficultyCalculator.Logic.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="CustomControls\questionMark.png" />
+  </ItemGroup>
+
 </Project>

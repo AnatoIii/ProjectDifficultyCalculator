@@ -3,10 +3,96 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ProjectDifficultyCalculator"
+        xmlns:local="clr-namespace:ProjectDifficultyCalculator" xmlns:csControls="clr-namespace:ProjectDifficultyCalculator.CustomControls"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Project complexity calculator" Height="650" Width="800">
     <Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <!--<StackPanel Grid.Column="0">
+                <Label>Size calculation</Label>
+                <Label>Factors calculation</Label>
+                <Label>Some more numbers</Label>
+                <Label>Results</Label>
+            </StackPanel>
+            <GridSplitter Grid.Column="1" ShowsPreview="True" Width="3"
+                HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="Arrow" IsEnabled="False"  />-->
+            <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <StackPanel Orientation="Vertical">
+                    <Label HorizontalAlignment="Center" FontSize="24" FontWeight="Bold">Lines amount</Label>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.5*"></ColumnDefinition>
+                            <ColumnDefinition Width="0.5*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Label FontWeight="Bold">SLOC</Label>
+                            <TextBox Text="0" Margin="3" Grid.Column="0" TextChanged="TextBox_TextChanged" Name="textBox1" Width="150" />
+                            <Button Grid.Column="1" Padding="3" Click="ButtonFP_Click">Calculate Functional point</Button>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center">
+                            <Label FontWeight="Bold">BRAK, %</Label>
+                            <TextBox Text="0" Margin="3" TextChanged="textBox2_TextChanged" Name="textBox2" Width="150" />
+                            <Button Padding="3" Click="ButtonFP_Click">Calculate Functional point</Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <Label HorizontalAlignment="Center" FontSize="24" FontWeight="Bold">Scale Factors</Label>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Name="scaleFactorsPanel1" Orientation="Vertical" Grid.Column="0">
+                            <!--<csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
+                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
+                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
+                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
+                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
+                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>-->
+                        </StackPanel>
+                        <StackPanel Name="scaleFactorsPanel2" Orientation="Vertical" Grid.Column="1">
+                        </StackPanel>
+                        <StackPanel Name="scaleFactorsPanel3" Orientation="Vertical" Grid.Column="2">
+                        </StackPanel>
+                    </Grid>
+                    
+                    <Label HorizontalAlignment="Center" FontSize="24" FontWeight="Bold">Cost Drivers</Label>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Name="costDriverPanel1" Orientation="Vertical" Grid.Column="0">
+                            <!--<csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
+                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
+                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
+                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
+                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
+                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>-->
+                        </StackPanel>
+                        <StackPanel Name="costDriverPanel2" Orientation="Vertical" Grid.Column="1">
+                        </StackPanel>
+                        <StackPanel Name="costDriverPanel3" Orientation="Vertical" Grid.Column="2">
+                        </StackPanel>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="1" Margin="10" Padding="3" Click="Button_Click">Calculate</Button>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
 
     </Grid>
 </Window>
