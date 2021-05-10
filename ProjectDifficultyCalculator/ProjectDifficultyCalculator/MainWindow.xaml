@@ -3,26 +3,57 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ProjectDifficultyCalculator" xmlns:csControls="clr-namespace:ProjectDifficultyCalculator.CustomControls"
+        xmlns:local="clr-namespace:ProjectDifficultyCalculator" 
+        xmlns:csControls="clr-namespace:ProjectDifficultyCalculator.CustomControls"
         mc:Ignorable="d"
-        Title="Project complexity calculator" Height="650" Width="800">
+        ResizeMode="NoResize"
+        Title="Project complexity calculator" Height="650" Width="1000">
+    <Window.Resources>
+        <Style x:Key="MenuStyles" TargetType="{x:Type Button}">
+            <Setter Property="Control.Padding" Value="10" />
+            <Setter Property="Control.HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Control.BorderThickness" Value="0" />
+            <Setter Property="Control.Background" Value="White"/>
+            <Setter Property="Control.Margin" Value="0,5,0,5" />
+            <Setter Property="Control.Cursor" Value="Hand" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="LightGray"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <local:StepTypeConverter x:Key="WindowState" />
+        <local:FontWeightConverter x:Key="FontWeight" />
+    </Window.Resources>
     <Grid>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0*"></ColumnDefinition>
+                <ColumnDefinition Width="0.25*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <!--<StackPanel Grid.Column="0">
-                <Label>Size calculation</Label>
-                <Label>Factors calculation</Label>
-                <Label>Some more numbers</Label>
-                <Label>Results</Label>
+            <StackPanel Grid.Column="0">
+                <Button Style="{StaticResource MenuStyles}" Click="BSizeCalculation_Click" FontWeight="{Binding CurrentStep, ConverterParameter='size', Converter={StaticResource FontWeight}}">Size calculation</Button>
+                <Button Style="{StaticResource MenuStyles}" Click="BScaleFactorsCalculation_Click" FontWeight="{Binding CurrentStep, ConverterParameter='scaleFactors', Converter={StaticResource FontWeight}}">Scale factors calculation</Button>
+                <Button Style="{StaticResource MenuStyles}" Click="BCostDriverCalculation_Click" FontWeight="{Binding CurrentStep, ConverterParameter='costDriver', Converter={StaticResource FontWeight}}">Cost drivers calculation</Button>
+                <Button Style="{StaticResource MenuStyles}" Click="BResults_Click" FontWeight="{Binding CurrentStep, ConverterParameter='results', Converter={StaticResource FontWeight}}">Results</Button>
             </StackPanel>
             <GridSplitter Grid.Column="1" ShowsPreview="True" Width="3"
-                HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="Arrow" IsEnabled="False"  />-->
-            <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                <StackPanel Orientation="Vertical">
+                HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="Arrow" IsEnabled="False"  />
+            <Grid Grid.Column="2">
+                <!-- Size part -->
+                <StackPanel Visibility="{Binding CurrentStep, ConverterParameter='size', Converter={StaticResource WindowState}}"  Grid.Column="0" Grid.Row="0">
                     <Label HorizontalAlignment="Center" FontSize="24" FontWeight="Bold" Content="Lines Amount"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -41,7 +72,9 @@
                             <Button Padding="3" Click="ButtonFP_Click">Calculate Functional point</Button>
                         </StackPanel>
                     </Grid>
-
+                </StackPanel>
+                <!-- Scale factors part -->
+                <StackPanel Visibility="{Binding CurrentStep, ConverterParameter='scaleFactors', Converter={StaticResource WindowState}}" Grid.Column="0" Grid.Row="0">
                     <Label HorizontalAlignment="Center" FontSize="24" FontWeight="Bold">Scale Factors</Label>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -50,39 +83,41 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Name="scaleFactorsPanel1" Orientation="Vertical" Grid.Column="0">
-                            <!--<csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
-                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
-                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
-                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
-                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
-                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>-->
                         </StackPanel>
                         <StackPanel Name="scaleFactorsPanel2" Orientation="Vertical" Grid.Column="1">
                         </StackPanel>
                         <StackPanel Name="scaleFactorsPanel3" Orientation="Vertical" Grid.Column="2">
                         </StackPanel>
                     </Grid>
-                    
-                    <Label HorizontalAlignment="Center" FontSize="24" FontWeight="Bold">Cost Drivers</Label>
+                </StackPanel>
+                <!-- Cost drivers part -->
+                <StackPanel Visibility="{Binding CurrentStep, ConverterParameter='costDriver', Converter={StaticResource WindowState}}" Grid.Column="0" Grid.Row="9">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Name="costDriverPanel1" Orientation="Vertical" Grid.Column="0">
-                            <!--<csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
-                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
-                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
-                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
-                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>
-                            <csControls:SelectorControl Title="test" ControlTooltip="123" Grid.Column="0"/>-->
-                        </StackPanel>
-                        <StackPanel Name="costDriverPanel2" Orientation="Vertical" Grid.Column="1">
-                        </StackPanel>
-                        <StackPanel Name="costDriverPanel3" Orientation="Vertical" Grid.Column="2">
-                        </StackPanel>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="612"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <ScrollViewer Grid.Row="0">
+                            <StackPanel>
+                                <Label HorizontalAlignment="Center" FontSize="24" FontWeight="Bold">Cost Drivers</Label>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Name="costDriverPanel1" Orientation="Vertical" Grid.Column="0">
+                                    </StackPanel>
+                                    <StackPanel Name="costDriverPanel2" Orientation="Vertical" Grid.Column="1">
+                                    </StackPanel>
+                                    <StackPanel Name="costDriverPanel3" Orientation="Vertical" Grid.Column="2">
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </ScrollViewer>
                     </Grid>
+                </StackPanel>
+                <!-- Results -->
+                <StackPanel Visibility="{Binding CurrentStep, ConverterParameter='results', Converter={StaticResource WindowState}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"></ColumnDefinition>
@@ -91,8 +126,7 @@
                         <Button Grid.Column="1" Margin="10" Padding="3" Click="CalculateButton_Click">Calculate</Button>
                     </Grid>
                 </StackPanel>
-            </ScrollViewer>
+            </Grid>
         </Grid>
-
     </Grid>
 </Window>

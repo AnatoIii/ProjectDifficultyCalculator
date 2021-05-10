@@ -2,6 +2,7 @@
 using ProjectDifficultyCalculator.Logic.COCOMO;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -21,12 +22,14 @@ namespace ProjectDifficultyCalculator
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private List<SelectorControl> CostDriverControls { get; set; }
         private List<SelectorControl> ScaleFactorsControls { get; set; }
         private CocomoCalculator CocomoCalculator { get; set; }
         private CocomoProperties CocomoProperties => CocomoCalculator.Properties;
+
+        public CurrentStep _currentStep { get; set; }
 
         public MainWindow()
         {
@@ -44,7 +47,8 @@ namespace ProjectDifficultyCalculator
                 {
                     Id = costDriver.ShortName,
                     ControlTooltip = costDriver.FullName,
-                    Title = costDriver.ShortName
+                    Title = costDriver.ShortName,
+                    Values = costDriver.Coefficients
                 };
 
                 if (i % 3 == 0)
@@ -76,7 +80,8 @@ namespace ProjectDifficultyCalculator
                 {
                     Id = costDriver.ShortName,
                     ControlTooltip = costDriver.FullName,
-                    Title = costDriver.ShortName
+                    Title = costDriver.ShortName,
+                    Values = costDriver.Coefficients
                 };
 
                 if (i % 3 == 0)
@@ -107,6 +112,12 @@ namespace ProjectDifficultyCalculator
             //    Title = "Test title"
             //};
             //this.panel2.Children.Add(selectorControl);
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private void ShowError(string message)
@@ -159,5 +170,53 @@ namespace ProjectDifficultyCalculator
             var regex = new Regex("[^0-9.,]+");
             e.Handled = regex.IsMatch(e.Text);
         }
+
+        private void BSizeCalculation_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentStep != CurrentStep.SizeCalculation)
+            {
+                CurrentStep = CurrentStep.SizeCalculation;
+            }
+        }
+        private void BScaleFactorsCalculation_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentStep != CurrentStep.ScaleFactorsCalculation)
+            {
+                CurrentStep = CurrentStep.ScaleFactorsCalculation;
+            }
+        }
+        private void BCostDriverCalculation_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentStep != CurrentStep.CostDriverCalculation)
+            {
+                CurrentStep = CurrentStep.CostDriverCalculation;
+            }
+        }
+        private void BResults_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentStep != CurrentStep.Results)
+            {
+                CurrentStep = CurrentStep.Results;
+            }
+        }
+
+
+        public CurrentStep CurrentStep
+        {
+            get { return _currentStep; }
+            private set
+            {
+                _currentStep = value;
+                OnPropertyChanged("CurrentStep");
+            }
+        }
+    }
+
+    public enum CurrentStep
+    {
+        SizeCalculation,
+        ScaleFactorsCalculation,
+        CostDriverCalculation,
+        Results
     }
 }

@@ -4,7 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ProjectDifficultyCalculator.CustomControls"
-             mc:Ignorable="d" d:DesignWidth="220" Height="70">
+             mc:Ignorable="d" d:DesignWidth="220" Height="70"
+             Loaded="UserControl_Loaded"
+             >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25"></RowDefinition>
@@ -18,10 +20,11 @@
             VerticalAlignment="Center" 
             Minimum="0" 
             Maximum="5" 
-            Value="2" 
             ValueChanged="Slider_ValueChanged" 
             IsSnapToTickEnabled="True"
-            TickFrequency="1" TickPlacement="BottomRight" />
+            TickFrequency="1" 
+            Value="{Binding SliderValue}"
+            TickPlacement="BottomRight" />
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -40,12 +43,12 @@
                 <ColumnDefinition Width="0.2*"></ColumnDefinition>
                 <ColumnDefinition Width="0.2*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Label Grid.Column="0" Content="VL" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="Very Low" />
-            <Label Grid.Column="1" Content="L" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="Low" />
-            <Label Grid.Column="2" Content="N" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="Nominal" />
-            <Label Grid.Column="3" Content="H" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="High" />
-            <Label Grid.Column="4" Content="VH" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="Very High" />
-            <Label Grid.Column="5" Content="EH" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="Extra High" />
+            <Label Name="LVL" Grid.Column="0" Content="VL" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="Very Low" />
+            <Label Name="LL" Grid.Column="1" Content="L" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="Low" />
+            <Label Name="LN" Grid.Column="2" Content="N" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="Nominal" />
+            <Label Name="LH" Grid.Column="3" Content="H" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="High" />
+            <Label Name="LVH" Grid.Column="4" Content="VH" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="Very High" />
+            <Label Name="LEH" Grid.Column="5" Content="EH" HorizontalAlignment="Center" VerticalAlignment="Top" Height="23" FontSize="8" ToolTip="Extra High" />
         </Grid>
     </Grid>
 </UserControl>
