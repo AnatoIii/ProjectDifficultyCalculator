@@ -1,0 +1,16 @@
+﻿<Window x:Class="ProjectDifficultyCalculator.DefaultLanguageSelector.DefaultLanguageSelectorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ProjectDifficultyCalculator.DefaultLanguageSelector"
+        mc:Ignorable="d"
+        Title="Primary language" Height="150" Width="300">
+    <Grid>
+        <StackPanel VerticalAlignment="Center">
+            <Label HorizontalAlignment="Center" FontWeight="Bold" FontSize="20">Select primary language</Label>
+            <ComboBox Name="CBLanguages" HorizontalAlignment="Center" Width="100"></ComboBox>
+            <Button Name="BAccept" Padding="5" HorizontalAlignment="Center" Margin="5" Click="BAccept_Click">Select</Button>
+        </StackPanel>
+    </Grid>
+</Window>

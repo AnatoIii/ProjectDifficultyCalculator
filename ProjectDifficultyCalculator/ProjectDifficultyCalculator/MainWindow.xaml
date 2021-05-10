@@ -72,6 +72,22 @@
                             <Button Padding="3" Click="ButtonFP_Click">Calculate Functional point</Button>
                         </StackPanel>
                     </Grid>
+                    <Button HorizontalAlignment="Center" Margin="20" Padding="15,5,15,5" FontSize="20" Click="Button_Click">Calculate</Button>
+                    <Label HorizontalAlignment="Center" FontWeight="Bold" FontSize="20">Results</Label>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.25*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="0.25*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <DataGrid Name="SizesDataGrid" Grid.Column="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Language" FontWeight="Bold" Binding="{Binding Path=Language}" Width="0.5*"></DataGridTextColumn>
+                                <DataGridTextColumn Header="Lines Amount" Binding="{Binding Path=LinesAmount}" Width="0.5*"></DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
                 </StackPanel>
                 <!-- Scale factors part -->
                 <StackPanel Visibility="{Binding CurrentStep, ConverterParameter='scaleFactors', Converter={StaticResource WindowState}}" Grid.Column="0" Grid.Row="0">
