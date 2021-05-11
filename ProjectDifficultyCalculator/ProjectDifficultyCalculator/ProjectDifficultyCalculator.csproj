@@ -8,14 +8,17 @@
 
   <ItemGroup>
     <None Remove="CustomControls\questionMark.png" />
+    <None Remove="refresh.png" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ProjectDifficultyCalculator.Logic\ProjectDifficultyCalculator.Logic.csproj" />
+    <ProjectReference Include="..\ProjectDifficultyCalculator.Serializers\ProjectDifficultyCalculator.Serializers.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="CustomControls\questionMark.png" />
+    <Resource Include="refresh.png" />
   </ItemGroup>
 
 </Project>

@@ -15,30 +15,35 @@ namespace ProjectDifficultyCalculator.CustomControls
         public string Id { get; set; }
         public string Title { get; set; }
         public string ControlTooltip { get; set; }
-        private int _value { get; set; }
+        public double[] Values { get; private set; }
 
-        public double[] Values { get; set; }
-
-        private int _sliderValue = 2;
+        private int _value = 2;
         public int SliderValue
         {
-            get { return _sliderValue; }
+            get { return _value; }
             set
             {
                 if (double.IsNaN(Values[value]))
                 {
-                    _sliderValue = GetClosestNotNaN(value);
+                    _value = GetClosestNotNaN(value);
                 }
-                else if (value != _sliderValue)
+                else if (value != _value)
                 {
-                    _sliderValue = value;
+                    _value = value;
                     OnPropertyChanged("SliderValue");
                 }
             }
         }
 
-        public SelectorControl()
+        public SelectorControl(double[] values, int? initValue)
         {
+            Values = values;
+
+            if (initValue != null && initValue != _value)
+            {
+                SliderValue = (int)initValue;
+            }
+
             InitializeComponent();
             DataContext = this;
         }

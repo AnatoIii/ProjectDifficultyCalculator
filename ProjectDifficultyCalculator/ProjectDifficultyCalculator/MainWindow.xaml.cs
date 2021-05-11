@@ -21,6 +21,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ProjectDifficultyCalculator.Logic.UFP;
+using ProjectDifficultyCalculator.Serializers;
 
 namespace ProjectDifficultyCalculator
 {
@@ -39,26 +40,76 @@ namespace ProjectDifficultyCalculator
         private CocomoProperties CocomoProperties => CocomoCalculator.Properties;
         private UfpProperties UfpProperties => UfpCalculator.Properties;
 
+        private string _result;
+        public string Result
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_result))
+                {
+                    return "No calcualtion";
+                } 
+                return _result;
+            }
+            set
+            {
+                var doubleValue = double.Parse(value);
+                if (doubleValue > 0)
+                {
+                    _result = string.Format("{0:N} person-months", doubleValue);
+                }
+                else
+                {
+                    _result = "Incorrect values";
+                }
+                OnPropertyChanged("Result");
+            }
+        }
+
         public CurrentStep _currentStep { get; set; }
 
         public MainWindow()
         {
-            CostDriverControls = new List<SelectorControl>();
-            ScaleFactorsControls = new List<SelectorControl>();
+            var jsonSerializer = new JsonFileSerializer<(uint, double, int[], int[], Dictionary<string, uint[][]>, Dictionary<string, uint[][]>)>();
+            (uint sloc, double brak, int[] scaleFactors, int[] costDrivers, Dictionary<string, uint[][]> slocLangsFp, Dictionary<string, uint[][]> brakLangsFp) = jsonSerializer.Load("test.json");
+
             InitializeComponent();
             DataContext = this;
+
             CocomoCalculator = new CocomoCalculator(CocomoDefaultPropertiesFactory.Create());
             UfpCalculator = new UfpCalculator(UfpDefaultPropertiesFactory.Create());
+            CostDriverControls = new List<SelectorControl>();
+            ScaleFactorsControls = new List<SelectorControl>();
+            _languageSizes = new List<LanguageSize>
+            {
+                new LanguageSize(UfpProperties.LanguagesSlocPerFpDict.Keys.First(), 0),
+                new LanguageSize("Total", 0)
+            };
+            SizesDataGrid.ItemsSource = _languageSizes;
+
+            InitScaleFactors(scaleFactors);
+            InitCostDrivers(costDrivers);
+            InitSizePage(sloc, brak, slocLangsFp, brakLangsFp);
+            InitResult(sloc, brak);
+        }
+
+        #region Initialization
+        private void InitScaleFactors(int[] scaleFactors)
+        {
+            int[] values = null;
+            if (scaleFactors != null && scaleFactors.Length == CocomoProperties.ScaleFactors.Length)
+            {
+                values = scaleFactors;
+            }
 
             for (var i = 0; i < CocomoProperties.ScaleFactors.Length; i++)
             {
-                var costDriver = CocomoProperties.ScaleFactors[i];
-                var selectorControl = new SelectorControl()
+                var scaleFactor = CocomoProperties.ScaleFactors[i];
+                var selectorControl = new SelectorControl(scaleFactor.Coefficients, values?[i])
                 {
-                    Id = costDriver.ShortName,
-                    ControlTooltip = costDriver.FullName,
-                    Title = costDriver.ShortName,
-                    Values = costDriver.Coefficients
+                    Id = scaleFactor.ShortName,
+                    ControlTooltip = scaleFactor.FullName,
+                    Title = scaleFactor.ShortName
                 };
 
                 if (i % 3 == 0)
@@ -76,16 +127,24 @@ namespace ProjectDifficultyCalculator
 
                 ScaleFactorsControls.Add(selectorControl);
             }
+        }
+
+        private void InitCostDrivers(int[] costDrivers)
+        {
+            int[] values = null;
+            if (costDrivers != null && costDrivers.Length == CocomoProperties.CostDrivers.Length)
+            {
+                values = costDrivers;
+            }
 
             for (var i = 0; i < CocomoProperties.CostDrivers.Length; i++)
             {
                 var costDriver = CocomoProperties.CostDrivers[i];
-                var selectorControl = new SelectorControl()
+                var selectorControl = new SelectorControl(costDriver.Coefficients, values?[i])
                 {
                     Id = costDriver.ShortName,
                     ControlTooltip = costDriver.FullName,
-                    Title = costDriver.ShortName,
-                    Values = costDriver.Coefficients
+                    Title = costDriver.ShortName
                 };
 
                 if (i % 3 == 0)
@@ -103,15 +162,39 @@ namespace ProjectDifficultyCalculator
 
                 CostDriverControls.Add(selectorControl);
             }
-
-            _languageSizes = new List<LanguageSize>
-            {
-                new LanguageSize(UfpProperties.LanguagesSlocPerFpDict.Keys.First(), 0),
-                new LanguageSize("Total", 0)
-            };
-
-            SizesDataGrid.ItemsSource = _languageSizes;
         }
+
+        private void InitSizePage(uint sloc, double brak, Dictionary<string, uint[][]> slocLangsFp, Dictionary<string, uint[][]> brakLangsFp)
+        {
+            if (sloc != default)
+            {
+                slocTextBox.Text = sloc.ToString();
+            }
+
+            if (brak != default)
+            {
+                brakTextBox.Text = brak.ToString();
+            }
+
+            // It's better to check if slocLangsFp.Keys are similar to brakLangsFp.Keys
+            if (slocLangsFp != null && slocLangsFp.Keys.Count() > 0 && brakLangsFp.Keys != null && brakLangsFp.Keys.Count() > 0) 
+            {
+                _slocLangsFp = slocLangsFp;
+                _brakLangsFp = brakLangsFp;
+                UpdateTable();
+            }
+        }
+
+        private void InitResult(uint sloc, double brak)
+        {
+            if (sloc == 0 || brak > 100 || brak < 0)
+            {
+                return;
+            }
+
+            CalculateResult(sloc, brak, false);
+        }
+        #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
@@ -179,7 +262,6 @@ namespace ProjectDifficultyCalculator
                 }
             }
         }
-
         private void UpdateTable()
         {
             _languageSizes.Clear();
@@ -247,7 +329,6 @@ namespace ProjectDifficultyCalculator
 
         private void CalculateFP(Dictionary<string, uint[][]> current, Dictionary<string, uint[][]> max = null)
         {
-
             var fpWindow = new FunctionalPointsWindow(UfpProperties.LanguagesSlocPerFpDict.Keys, current, max);
             fpWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             Hide();
@@ -276,6 +357,7 @@ namespace ProjectDifficultyCalculator
             e.Handled = regex.IsMatch(e.Text);
         }
 
+        #region MenuButtons
         private void BSizeCalculation_Click(object sender, RoutedEventArgs e)
         {
             if (CurrentStep != CurrentStep.SizeCalculation)
@@ -304,7 +386,47 @@ namespace ProjectDifficultyCalculator
                 CurrentStep = CurrentStep.Results;
             }
         }
+        #endregion
 
+        private void ImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!uint.TryParse(slocTextBox.Text, out var sloc) || sloc == 0)
+            {
+                ShowError("Invalid SLOC value!");
+                return;
+            }
+
+            if (!double.TryParse(brakTextBox.Text, out var brak) || brak < 0 || brak > 100)
+            {
+                ShowError("Invalid BRAK value!" + Environment.NewLine + "BRAK must be >= 0 and <= 100.");
+                return;
+            }
+
+            CalculateResult(sloc, brak);
+        }
+
+        private void CalculateResult(uint sloc, double brak, bool withSave = true)
+        {
+            var scaleFactorsNumbers = ScaleFactorsControls.Select(c => c.GetValue());
+            var scaleFactors = scaleFactorsNumbers
+                .Zip(CocomoProperties.ScaleFactors)
+                .Select(pair => pair.Second.Coefficients[pair.First])
+                .ToArray();
+
+            var costDriversNumbers = CostDriverControls.Select(c => c.GetValue());
+            var costDrivers = costDriversNumbers
+                .Zip(CocomoProperties.CostDrivers)
+                .Select(pair => pair.Second.Coefficients[pair.First])
+                .ToArray();
+
+            if (withSave)
+            {
+                var jsonSerializer = new JsonFileSerializer<(uint, double, int[], int[], Dictionary<string, uint[][]>, Dictionary<string, uint[][]>)>();
+                jsonSerializer.Save("test.json", (sloc, brak, scaleFactorsNumbers.ToArray(), costDriversNumbers.ToArray(), _slocLangsFp, _brakLangsFp));
+            }
+
+            Result = CocomoCalculator.CalculateComplexityPM(sloc, brak, scaleFactors, costDrivers).ToString();
+        }
 
         public CurrentStep CurrentStep
         {

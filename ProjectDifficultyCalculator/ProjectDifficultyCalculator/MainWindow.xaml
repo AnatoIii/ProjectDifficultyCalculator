@@ -33,6 +33,15 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style TargetType="{x:Type Button}" x:Key="ImageButtonStyle">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <local:StepTypeConverter x:Key="WindowState" />
         <local:FontWeightConverter x:Key="FontWeight" />
     </Window.Resources>
@@ -43,12 +52,26 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0">
-                <Button Style="{StaticResource MenuStyles}" Click="BSizeCalculation_Click" FontWeight="{Binding CurrentStep, ConverterParameter='size', Converter={StaticResource FontWeight}}">Size calculation</Button>
-                <Button Style="{StaticResource MenuStyles}" Click="BScaleFactorsCalculation_Click" FontWeight="{Binding CurrentStep, ConverterParameter='scaleFactors', Converter={StaticResource FontWeight}}">Scale factors calculation</Button>
-                <Button Style="{StaticResource MenuStyles}" Click="BCostDriverCalculation_Click" FontWeight="{Binding CurrentStep, ConverterParameter='costDriver', Converter={StaticResource FontWeight}}">Cost drivers calculation</Button>
-                <Button Style="{StaticResource MenuStyles}" Click="BResults_Click" FontWeight="{Binding CurrentStep, ConverterParameter='results', Converter={StaticResource FontWeight}}">Results</Button>
-            </StackPanel>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="100"></RowDefinition>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Column="0">
+                    <Button Style="{StaticResource MenuStyles}" Click="BSizeCalculation_Click" FontWeight="{Binding CurrentStep, ConverterParameter='size', Converter={StaticResource FontWeight}}">Size calculation</Button>
+                    <Button Style="{StaticResource MenuStyles}" Click="BScaleFactorsCalculation_Click" FontWeight="{Binding CurrentStep, ConverterParameter='scaleFactors', Converter={StaticResource FontWeight}}">Scale factors calculation</Button>
+                    <Button Style="{StaticResource MenuStyles}" Click="BCostDriverCalculation_Click" FontWeight="{Binding CurrentStep, ConverterParameter='costDriver', Converter={StaticResource FontWeight}}">Cost drivers calculation</Button>
+                </StackPanel>
+                <StackPanel Grid.Row="1">
+                    <StackPanel Orientation="Horizontal">
+                        <Label FontSize="20" FontWeight="Bold">Result</Label>
+                        <Button Style="{StaticResource ImageButtonStyle}" Click="ImageButton_Click">
+                            <Image Name="IRefresh" Source="/refresh.png" Height="20" Margin="100,0,0,0" />
+                        </Button>
+                    </StackPanel>
+                    <Label Content="{Binding Result}" />
+                </StackPanel>
+            </Grid>
             <GridSplitter Grid.Column="1" ShowsPreview="True" Width="3"
                 HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="Arrow" IsEnabled="False"  />
             <Grid Grid.Column="2">
@@ -62,13 +85,15 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Image Width="15"  Source="/CustomControls/questionMark.png" Cursor="Hand" Margin="10,0,10,0" ToolTip="Source Lines of Code" />
                             <Label FontWeight="Bold" Content="SLOC, 10³"/>
-                            <TextBox Text="0" Margin="3" Grid.Column="0" PreviewTextInput="TextBox_IntegerValidation"  x:Name="slocTextBox" Width="150" />
+                            <TextBox Text="0" Margin="3" Grid.Column="0" PreviewTextInput="TextBox_IntegerValidation"  x:Name="slocTextBox" Width="120" />
                             <Button Grid.Column="1" Padding="3" Click="SlocButtonFP_Click">Calculate Functional point</Button>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center">
+                            <Image Width="15"  Source="/CustomControls/questionMark.png" Cursor="Hand" Margin="10,0,10,0" ToolTip="BRAK (change)" />
                             <Label FontWeight="Bold">BRAK, %</Label>
-                            <TextBox Text="0" Margin="3" PreviewTextInput="TextBox_DoubleValidation" x:Name="brakTextBox" Width="150" />
+                            <TextBox Text="0" Margin="3" PreviewTextInput="TextBox_DoubleValidation" x:Name="brakTextBox" Width="120" />
                             <Button Padding="3" Click="BrakButtonFP_Click">Calculate Functional point</Button>
                         </StackPanel>
                     </Grid>
@@ -130,16 +155,6 @@
                                 </Grid>
                             </StackPanel>
                         </ScrollViewer>
-                    </Grid>
-                </StackPanel>
-                <!-- Results -->
-                <StackPanel Visibility="{Binding CurrentStep, ConverterParameter='results', Converter={StaticResource WindowState}}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="1" Margin="10" Padding="3" Click="CalculateButton_Click">Calculate</Button>
                     </Grid>
                 </StackPanel>
             </Grid>

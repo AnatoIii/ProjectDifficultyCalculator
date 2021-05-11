@@ -97,23 +97,23 @@
 
                     <!--Data part-->
                     <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
-                        <Image Width="15"  Source="/CustomControls/questionMark.png" ToolTip="{Binding ControlTooltip}" Cursor="Hand" Margin="10,0,10,0"/>
+                        <Image Width="15"  Source="/CustomControls/questionMark.png" ToolTip="Internal Logical File" Cursor="Hand" Margin="10,0,10,0"/>
                         <Label Content="ILFs" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="0" Margin="10,0,0,0"/>
                     </StackPanel>
                     <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal">
-                        <Image Width="15"  Source="/CustomControls/questionMark.png" Cursor="Hand" Margin="10,0,10,0"/>
+                        <Image Width="15"  Source="/CustomControls/questionMark.png" Cursor="Hand" Margin="10,0,10,0" ToolTip="External Interface File" />
                         <Label Content="EIFs" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="0" Margin="10,0,0,0"/>
                     </StackPanel>
                     <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal">
-                        <Image Width="15"  Source="/CustomControls/questionMark.png" Cursor="Hand" Margin="10,0,10,0"/>
-                        <Label Content="Els" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="0" Margin="10,0,0,0"/>
+                        <Image Width="15"  Source="/CustomControls/questionMark.png" Cursor="Hand" Margin="10,0,10,0" ToolTip="External Input" />
+                        <Label Content="EIs" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="0" Margin="10,0,0,0"/>
                     </StackPanel>
                     <StackPanel Grid.Row="6" Grid.Column="0" Orientation="Horizontal">
-                        <Image Width="15"  Source="/CustomControls/questionMark.png" Cursor="Hand" Margin="10,0,10,0"/>
+                        <Image Width="15"  Source="/CustomControls/questionMark.png" Cursor="Hand" Margin="10,0,10,0" ToolTip="External Output" />
                         <Label Content="EOs" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="0" Margin="10,0,0,0"/>
                     </StackPanel>
                     <StackPanel Grid.Row="7" Grid.Column="0" Orientation="Horizontal">
-                        <Image Width="15"  Source="/CustomControls/questionMark.png" Cursor="Hand" Margin="10,0,10,0"/>
+                        <Image Width="15"  Source="/CustomControls/questionMark.png" Cursor="Hand" Margin="10,0,10,0" ToolTip="External Inquiry" />
                         <Label Content="EQs" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="0" Margin="10,0,0,0"/>
                     </StackPanel>
 

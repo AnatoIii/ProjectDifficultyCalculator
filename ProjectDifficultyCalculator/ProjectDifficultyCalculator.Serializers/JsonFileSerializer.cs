@@ -14,8 +14,21 @@ namespace ProjectDifficultyCalculator.Serializers
 
         public T Load(string path)
         {
+            if (!File.Exists(path))
+            {
+                return default;
+            }
+
             using var streamReader = new StreamReader(path);
-            return JsonConvert.DeserializeObject<T>(streamReader.ReadToEnd());
+            try
+            {
+                var data = JsonConvert.DeserializeObject<T>(streamReader.ReadToEnd());
+                return data;
+            }
+            catch
+            {
+                return default;
+            }
         }
     }
 }
