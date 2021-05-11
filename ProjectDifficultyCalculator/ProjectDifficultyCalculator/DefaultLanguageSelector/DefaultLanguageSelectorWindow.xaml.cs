@@ -21,11 +21,11 @@ namespace ProjectDifficultyCalculator.DefaultLanguageSelector
     {
         public string SelectedLanguage { get; set; }
 
-        public DefaultLanguageSelectorWindow()
+        public DefaultLanguageSelectorWindow(IEnumerable<string> languages)
         {
             InitializeComponent();
 
-            CBLanguages.ItemsSource = new List<string> { "C#", "C++", "Java", "SQL", "Perl", "HTML" };
+            CBLanguages.ItemsSource = languages;
             CBLanguages.SelectedIndex = 0;
         }
 

@@ -19,6 +19,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ProjectDifficultyCalculator.Logic.UFP;
 
 namespace ProjectDifficultyCalculator
 {
@@ -31,7 +32,9 @@ namespace ProjectDifficultyCalculator
         private List<SelectorControl> ScaleFactorsControls;
         private List<LanguageSize> _languageSizes;
         private CocomoCalculator CocomoCalculator;
+        private UfpCalculator UfpCalculator;
         private CocomoProperties CocomoProperties => CocomoCalculator.Properties;
+        private UfpProperties UfpProperties => UfpCalculator.Properties;
 
         public CurrentStep _currentStep { get; set; }
 
@@ -41,62 +44,62 @@ namespace ProjectDifficultyCalculator
             ScaleFactorsControls = new List<SelectorControl>();
             InitializeComponent();
             DataContext = this;
-            var properties = CocomoDefaultPropertiesFactory.Create();
-            CocomoCalculator = new CocomoCalculator(properties);
+            CocomoCalculator = new CocomoCalculator(CocomoDefaultPropertiesFactory.Create());
+            UfpCalculator = new UfpCalculator(UfpDefaultPropertiesFactory.Create());
 
-            //for (var i = 0; i < properties.ScaleFactors.Length; i++)
-            //{
-            //    var costDriver = properties.ScaleFactors[i];
-            //    var selectorControl = new SelectorControl()
-            //    {
-            //        Id = costDriver.ShortName,
-            //        ControlTooltip = costDriver.FullName,
-            //        Title = costDriver.ShortName,
-            //        Values = costDriver.Coefficients
-            //    };
+            for (var i = 0; i < CocomoProperties.ScaleFactors.Length; i++)
+            {
+                var costDriver = CocomoProperties.ScaleFactors[i];
+                var selectorControl = new SelectorControl()
+                {
+                    Id = costDriver.ShortName,
+                    ControlTooltip = costDriver.FullName,
+                    Title = costDriver.ShortName,
+                    Values = costDriver.Coefficients
+                };
 
-            //    if (i % 3 == 0)
-            //    {
-            //        scaleFactorsPanel1.Children.Add(selectorControl);
-            //    }
-            //    else if (i % 3 == 1)
-            //    {
-            //        scaleFactorsPanel2.Children.Add(selectorControl);
-            //    }
-            //    else if (i % 3 == 2)
-            //    {
-            //        scaleFactorsPanel3.Children.Add(selectorControl);
-            //    }
+                if (i % 3 == 0)
+                {
+                    scaleFactorsPanel1.Children.Add(selectorControl);
+                }
+                else if (i % 3 == 1)
+                {
+                    scaleFactorsPanel2.Children.Add(selectorControl);
+                }
+                else if (i % 3 == 2)
+                {
+                    scaleFactorsPanel3.Children.Add(selectorControl);
+                }
 
-            //    ScaleFactorsControls.Add(selectorControl);
-            //}
+                ScaleFactorsControls.Add(selectorControl);
+            }
 
-            //for (var i = 0; i < properties.CostDrivers.Length; i++)
-            //{
-            //    var costDriver = properties.CostDrivers[i];
-            //    var selectorControl = new SelectorControl()
-            //    {
-            //        Id = costDriver.ShortName,
-            //        ControlTooltip = costDriver.FullName,
-            //        Title = costDriver.ShortName,
-            //        Values = costDriver.Coefficients
-            //    };
+            for (var i = 0; i < CocomoProperties.CostDrivers.Length; i++)
+            {
+                var costDriver = CocomoProperties.CostDrivers[i];
+                var selectorControl = new SelectorControl()
+                {
+                    Id = costDriver.ShortName,
+                    ControlTooltip = costDriver.FullName,
+                    Title = costDriver.ShortName,
+                    Values = costDriver.Coefficients
+                };
 
-            //    if (i % 3 == 0)
-            //    {
-            //        costDriverPanel1.Children.Add(selectorControl);
-            //    }
-            //    else if (i % 3 == 1)
-            //    {
-            //        costDriverPanel2.Children.Add(selectorControl);
-            //    }
-            //    else if (i % 3 == 2)
-            //    {
-            //        costDriverPanel3.Children.Add(selectorControl);
-            //    }
+                if (i % 3 == 0)
+                {
+                    costDriverPanel1.Children.Add(selectorControl);
+                }
+                else if (i % 3 == 1)
+                {
+                    costDriverPanel2.Children.Add(selectorControl);
+                }
+                else if (i % 3 == 2)
+                {
+                    costDriverPanel3.Children.Add(selectorControl);
+                }
 
-            //    CostDriverControls.Add(selectorControl);
-            //}
+                CostDriverControls.Add(selectorControl);
+            }
 
             _languageSizes = new List<LanguageSize>();
             _languageSizes.Add(new LanguageSize("C#", 120));
@@ -203,26 +206,28 @@ namespace ProjectDifficultyCalculator
         }
 
 
-        private Dictionary<string, double[]> _languages;
+        private Dictionary<string, double[]> _slocLangsFp;
+        private Dictionary<string, double[]> _brakLangsFp;
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (_languages == null)
+            if (_slocLangsFp == null)
             {
-                var dlsWindow = new DefaultLanguageSelectorWindow();
+                var dlsWindow = new DefaultLanguageSelectorWindow(UfpProperties.LanguagesSlocPerFpDict.Keys);
                 dlsWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 dlsWindow.ShowDialog();
 
                 var selectedLanguage = dlsWindow.SelectedLanguage;
+                dlsWindow.Close();
                 if (selectedLanguage == null)
                 {
                     return;
                 }
 
-                _languages = new Dictionary<string, double[]>();
-                _languages.Add(selectedLanguage, new double[15]);
+                _slocLangsFp = new Dictionary<string, double[]>();
+                _slocLangsFp.Add(selectedLanguage, new double[15]);
             }
 
-            var fpWindow = new FunctionalPointsWindow(_languages);
+            var fpWindow = new FunctionalPointsWindow(UfpProperties.LanguagesSlocPerFpDict.Keys, _slocLangsFp);
             fpWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             Hide();
             fpWindow.ShowDialog();
@@ -230,10 +235,11 @@ namespace ProjectDifficultyCalculator
 
             if (!fpWindow.Hidden)
             {
+                fpWindow.Close();
                 return;
             }
             var languages = fpWindow.GetLanguages();
-            _languages = languages;
+            _slocLangsFp = languages;
             _languageSizes.Clear();
             foreach (var language in languages)
             {
@@ -241,6 +247,7 @@ namespace ProjectDifficultyCalculator
             }
             _languageSizes.Add(new LanguageSize("Total", _languageSizes.Select(el => el.LinesAmount).Sum()));
             SizesDataGrid.Items.Refresh();
+            fpWindow.Close();
         }
     }
 

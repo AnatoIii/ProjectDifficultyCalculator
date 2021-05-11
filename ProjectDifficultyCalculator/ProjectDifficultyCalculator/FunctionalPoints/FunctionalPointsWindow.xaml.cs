@@ -23,7 +23,7 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
     {
         private List<TextBox> _textBoxes;
         public List<string> _availableLanguages;
-        public List<string> _allLanguages;
+        public IEnumerable<string> _allLanguages;
         private string _currentLanguage;
         public string CurrentLanguage
         {
@@ -43,14 +43,11 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
             return _languagesComplexity;
         }
 
-        public FunctionalPointsWindow(Dictionary<string, double[]> languagesComplexity = null)
+        public FunctionalPointsWindow(IEnumerable<string> allLanguages, Dictionary<string, double[]> languagesComplexity = null)
         {
             InitializeComponent();
 
-            _allLanguages = new List<string> { "C#", "C++", "Java", "SQL", "Perl", "HTML" };
-            _availableLanguages = new List<string> { "C#", "C++", "Java", "SQL", "Perl", "HTML" };
-
-            _languagesComplexity = new Dictionary<string, double[]>();
+            _allLanguages = allLanguages;
 
             _textBoxes = new List<TextBox>()
             {
@@ -60,8 +57,6 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
                 EOs_Low, EOs_Average, EOs_High,
                 EQs_Low, EQs_Average, EQs_High
             };
-
-            CBlanguage.ItemsSource = _availableLanguages;
 
             if (languagesComplexity != null)
             {
@@ -74,6 +69,13 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
                 }
                 SelectLanguage(languagesComplexity.Keys.First());
             }
+            else
+            {
+                _languagesComplexity = new Dictionary<string, double[]>();
+                _availableLanguages = new List<string>(_allLanguages);
+            }
+
+            CBlanguage.ItemsSource = _availableLanguages;
         }
 
         private RoutedEventHandler SetLanguage(string language)
@@ -117,7 +119,7 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
             {
                 _availableLanguages.Add(language);
 
-                var newLanguage = _allLanguages.Where(el => !_availableLanguages.Contains(el)).FirstOrDefault() ?? "";
+                var newLanguage = _allLanguages.FirstOrDefault(el => !_availableLanguages.Contains(el)) ?? "";
 
                 if (newLanguage == "")
                 {
