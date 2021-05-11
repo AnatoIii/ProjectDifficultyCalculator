@@ -6,6 +6,7 @@ using ProjectDifficultyCalculator.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -33,6 +34,8 @@ namespace ProjectDifficultyCalculator
         private List<LanguageSize> _languageSizes;
         private CocomoCalculator CocomoCalculator;
         private UfpCalculator UfpCalculator;
+        private Dictionary<string, uint[][]> _slocLangsFp;
+        private Dictionary<string, uint[][]> _brakLangsFp;
         private CocomoProperties CocomoProperties => CocomoCalculator.Properties;
         private UfpProperties UfpProperties => UfpCalculator.Properties;
 
@@ -101,9 +104,11 @@ namespace ProjectDifficultyCalculator
                 CostDriverControls.Add(selectorControl);
             }
 
-            _languageSizes = new List<LanguageSize>();
-            _languageSizes.Add(new LanguageSize("C#", 120));
-            _languageSizes.Add(new LanguageSize("Total", 1020));
+            _languageSizes = new List<LanguageSize>
+            {
+                new LanguageSize(UfpProperties.LanguagesSlocPerFpDict.Keys.First(), 0),
+                new LanguageSize("Total", 0)
+            };
 
             SizesDataGrid.ItemsSource = _languageSizes;
         }
@@ -147,10 +152,116 @@ namespace ProjectDifficultyCalculator
             MessageBox.Show(this, "Result: " + result + " person-months.", "Difficulty", MessageBoxButton.OK);
         }
 
-        private void ButtonFP_Click(object sender, RoutedEventArgs e)
+        private uint[][] CreateEmptyArraysForFP() => UfpProperties.Weights.Select(a => new uint[a.Coefficients.Length]).ToArray();
+
+        private void SynchronizeDictionaries(bool checkArrays)
         {
-            // In reality something should happen here, but I'm not sure what
-            // TODO
+            var keysToRemove = _brakLangsFp.Keys.Where(k => !_slocLangsFp.ContainsKey(k));
+            foreach (var key in keysToRemove) _brakLangsFp.Remove(key);
+            foreach (var (key, slocArrs) in _slocLangsFp)
+            {
+                if(_brakLangsFp.TryGetValue(key, out var brakArrs))
+                {
+                    if(!checkArrays) continue;
+                    for (var i = 0; i < slocArrs.Length; i++)
+                    {
+                        var slocRow = slocArrs[i];
+                        var brakRow = brakArrs[i];
+                        for (var j = 0; j < slocRow.Length; j++)
+                        {
+                            if (brakRow[j] > slocRow[j]) brakRow[j] = slocRow[j];
+                        }
+                    }
+                }
+                else
+                {
+                    _brakLangsFp.Add(key, CreateEmptyArraysForFP());
+                }
+            }
+        }
+
+        private void UpdateTable()
+        {
+            _languageSizes.Clear();
+
+            var totalSum = 0u;
+            var changeSum = 0u;
+
+            var changed = _brakLangsFp.ToDictionary(p => p.Key, p => UfpCalculator.CalculateSloc(p.Key, p.Value));
+            foreach (var (language, complexity) in _slocLangsFp)
+            {
+                var total = UfpCalculator.CalculateSloc(language, complexity);
+                changed.TryGetValue(language, out var change);
+                _languageSizes.Add(new LanguageSize(language, total, change));
+                totalSum += total;
+                changeSum += change;
+            }
+
+            _languageSizes.Add(new LanguageSize("Total", totalSum, changeSum));
+            SizesDataGrid.Items.Refresh();
+
+            if (totalSum > 0)
+            {
+                slocTextBox.Text = ((totalSum - 1) / 1000 + 1).ToString(); // round up
+                brakTextBox.Text = (100.0 * changeSum / totalSum).ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                slocTextBox.Text = "0";
+                brakTextBox.Text = "0";
+            }
+        }
+
+        private void SlocButtonFP_Click(object sender, RoutedEventArgs e)
+        {
+            if (_slocLangsFp == null)
+            {
+                var dlsWindow = new DefaultLanguageSelectorWindow(UfpProperties.LanguagesSlocPerFpDict.Keys);
+                dlsWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                dlsWindow.ShowDialog();
+
+                var selectedLanguage = dlsWindow.SelectedLanguage;
+                dlsWindow.Close();
+                if (selectedLanguage == null) return;
+
+                _slocLangsFp = new Dictionary<string, uint[][]> { { selectedLanguage, CreateEmptyArraysForFP() } };
+                _brakLangsFp = new Dictionary<string, uint[][]> { { selectedLanguage, CreateEmptyArraysForFP() } };
+            }
+
+            CalculateFP(_slocLangsFp);
+            SynchronizeDictionaries(true);
+        }
+
+        private void BrakButtonFP_Click(object sender, RoutedEventArgs e)
+        {
+            if (_brakLangsFp == null)
+            {
+                MessageBox.Show(this, "Must set SLOC before BRAK.", "Warning", MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            CalculateFP(_brakLangsFp, _slocLangsFp);
+            SynchronizeDictionaries(false);
+        }
+
+        private void CalculateFP(Dictionary<string, uint[][]> current, Dictionary<string, uint[][]> max = null)
+        {
+
+            var fpWindow = new FunctionalPointsWindow(UfpProperties.LanguagesSlocPerFpDict.Keys, current, max);
+            fpWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            Hide();
+            fpWindow.ShowDialog();
+            Show();
+
+            if (!fpWindow.Hidden)
+            {
+                fpWindow.Close();
+                return;
+            }
+
+            UpdateTable();
+            fpWindow.Close();
         }
 
         private void TextBox_IntegerValidation(object sender, TextCompositionEventArgs e)
@@ -203,51 +314,6 @@ namespace ProjectDifficultyCalculator
                 _currentStep = value;
                 OnPropertyChanged("CurrentStep");
             }
-        }
-
-
-        private Dictionary<string, double[]> _slocLangsFp;
-        private Dictionary<string, double[]> _brakLangsFp;
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            if (_slocLangsFp == null)
-            {
-                var dlsWindow = new DefaultLanguageSelectorWindow(UfpProperties.LanguagesSlocPerFpDict.Keys);
-                dlsWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                dlsWindow.ShowDialog();
-
-                var selectedLanguage = dlsWindow.SelectedLanguage;
-                dlsWindow.Close();
-                if (selectedLanguage == null)
-                {
-                    return;
-                }
-
-                _slocLangsFp = new Dictionary<string, double[]>();
-                _slocLangsFp.Add(selectedLanguage, new double[15]);
-            }
-
-            var fpWindow = new FunctionalPointsWindow(UfpProperties.LanguagesSlocPerFpDict.Keys, _slocLangsFp);
-            fpWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            Hide();
-            fpWindow.ShowDialog();
-            Show();
-
-            if (!fpWindow.Hidden)
-            {
-                fpWindow.Close();
-                return;
-            }
-            var languages = fpWindow.GetLanguages();
-            _slocLangsFp = languages;
-            _languageSizes.Clear();
-            foreach (var language in languages)
-            {
-                _languageSizes.Add(new LanguageSize(language.Key, 100));
-            }
-            _languageSizes.Add(new LanguageSize("Total", _languageSizes.Select(el => el.LinesAmount).Sum()));
-            SizesDataGrid.Items.Refresh();
-            fpWindow.Close();
         }
     }
 

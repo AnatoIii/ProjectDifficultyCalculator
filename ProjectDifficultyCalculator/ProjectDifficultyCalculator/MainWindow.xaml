@@ -64,15 +64,14 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <Label FontWeight="Bold" Content="SLOC, 10³"/>
                             <TextBox Text="0" Margin="3" Grid.Column="0" PreviewTextInput="TextBox_IntegerValidation"  x:Name="slocTextBox" Width="150" />
-                            <Button Grid.Column="1" Padding="3" Click="ButtonFP_Click">Calculate Functional point</Button>
+                            <Button Grid.Column="1" Padding="3" Click="SlocButtonFP_Click">Calculate Functional point</Button>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center">
                             <Label FontWeight="Bold">BRAK, %</Label>
                             <TextBox Text="0" Margin="3" PreviewTextInput="TextBox_DoubleValidation" x:Name="brakTextBox" Width="150" />
-                            <Button Padding="3" Click="ButtonFP_Click">Calculate Functional point</Button>
+                            <Button Padding="3" Click="BrakButtonFP_Click">Calculate Functional point</Button>
                         </StackPanel>
                     </Grid>
-                    <Button HorizontalAlignment="Center" Margin="20" Padding="15,5,15,5" FontSize="20" Click="Button_Click">Calculate</Button>
                     <Label HorizontalAlignment="Center" FontWeight="Bold" FontSize="20">Results</Label>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -83,8 +82,9 @@
 
                         <DataGrid Name="SizesDataGrid" Grid.Column="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserSortColumns="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Language" FontWeight="Bold" Binding="{Binding Path=Language}" Width="0.5*"></DataGridTextColumn>
-                                <DataGridTextColumn Header="Lines Amount" Binding="{Binding Path=LinesAmount}" Width="0.5*"></DataGridTextColumn>
+                                <DataGridTextColumn Header="Language" FontWeight="Bold" Binding="{Binding Path=Language}" Width="1*"></DataGridTextColumn>
+                                <DataGridTextColumn Header="Lines of Code" Binding="{Binding Path=LinesAmount}" Width="1*"></DataGridTextColumn>
+                                <DataGridTextColumn Header="Lines That May Change" Binding="{Binding Path=ChangeLines}" Width="1*"></DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>

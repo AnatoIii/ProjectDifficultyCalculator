@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,13 +22,13 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
     /// </summary>
     public partial class FunctionalPointsWindow : Window, INotifyPropertyChanged
     {
-        private List<TextBox> _textBoxes;
+        private readonly TextBox[][] _textBoxes;
         public List<string> _availableLanguages;
         public IEnumerable<string> _allLanguages;
         private string _currentLanguage;
         public string CurrentLanguage
         {
-            get { return _currentLanguage; }
+            get => _currentLanguage;
             set
             {
                 LLanguage.Content = value;
@@ -36,42 +37,39 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
             }
         }
 
-        private Dictionary<string, double[]> _languagesComplexity;
+        public Dictionary<string, uint[][]> LanguagesComplexities { get; }
+        private Dictionary<string, uint[][]> _maxComplexities;
 
-        public Dictionary<string, double[]> GetLanguages()
-        {
-            return _languagesComplexity;
-        }
-
-        public FunctionalPointsWindow(IEnumerable<string> allLanguages, Dictionary<string, double[]> languagesComplexity = null)
+        public FunctionalPointsWindow(IEnumerable<string> allLanguages, Dictionary<string, uint[][]> languagesComplexities, Dictionary<string, uint[][]> maxComplexities = null)
         {
             InitializeComponent();
 
             _allLanguages = allLanguages;
+            _maxComplexities = maxComplexities;
 
-            _textBoxes = new List<TextBox>()
+            _textBoxes = new []
             {
-                TBILFs_Low, TBILFs_Average, TBILFs_High,
-                EIFs_Low, EIFs_Average, EIFs_High,
-                Els_Low, Els_Average, Els_High,
-                EOs_Low, EOs_Average, EOs_High,
-                EQs_Low, EQs_Average, EQs_High
+                new[] { TBILFs_Low, TBILFs_Average, TBILFs_High },
+                new[] { EIFs_Low, EIFs_Average, EIFs_High },
+                new[] { Els_Low, Els_Average, Els_High },
+                new[] { EOs_Low, EOs_Average, EOs_High },
+                new[] { EQs_Low, EQs_Average, EQs_High }
             };
 
-            if (languagesComplexity != null)
+            if (languagesComplexities != null)
             {
-                _languagesComplexity = languagesComplexity;
-                _availableLanguages = _allLanguages.Where(el => !languagesComplexity.ContainsKey(el)).ToList();
+                LanguagesComplexities = languagesComplexities;
+                _availableLanguages = _allLanguages.Where(el => !languagesComplexities.ContainsKey(el)).ToList();
 
-                foreach(var language in _languagesComplexity.Keys)
+                foreach(var language in LanguagesComplexities.Keys)
                 {
-                    AddNewLanguage(language);
+                    AddNewLanguage(language, true);
                 }
-                SelectLanguage(languagesComplexity.Keys.First());
+                SelectLanguage(languagesComplexities.Keys.First());
             }
             else
             {
-                _languagesComplexity = new Dictionary<string, double[]>();
+                LanguagesComplexities = new Dictionary<string, uint[][]>();
                 _availableLanguages = new List<string>(_allLanguages);
             }
 
@@ -80,9 +78,10 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
 
         private RoutedEventHandler SetLanguage(string language)
         {
-            if (!_languagesComplexity.ContainsKey(language))
+            if (!LanguagesComplexities.ContainsKey(language))
             {
-                _languagesComplexity.Add(language, new double[15]);
+                var newArrs = _textBoxes.Select(a => new uint[a.Length]).ToArray();
+                LanguagesComplexities.Add(language, newArrs);
             }
 
             void BSendLanguage_Click(object sender, RoutedEventArgs e)
@@ -99,17 +98,25 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
 
             if (language == null)
             {
-                for (int i = 0; i < 15; i++)
+                foreach (var textBoxesArr in _textBoxes)
                 {
-                    _textBoxes[i].Text = "0";
+                    foreach (var textBox in textBoxesArr)
+                    {
+                        textBox.Text = "0";
+                    }
                 }
                 return;
             }
 
-            var values = _languagesComplexity[language];
-            for (int i = 0; i < 15; i++)
+            var values = LanguagesComplexities[language];
+            for (var i = 0; i < _textBoxes.Length; i++)
             {
-                _textBoxes[i].Text = values[i].ToString();
+                var textBoxesArr = _textBoxes[i];
+                var valuesArr = values[i];
+                for (var j = 0; j < textBoxesArr.Length; j++)
+                {
+                    textBoxesArr[j].Text = valuesArr[j].ToString();
+                }
             }
         }
 
@@ -119,44 +126,36 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
             {
                 _availableLanguages.Add(language);
 
-                var newLanguage = _allLanguages.FirstOrDefault(el => !_availableLanguages.Contains(el)) ?? "";
+                var newLanguage = _allLanguages.FirstOrDefault(el => !_availableLanguages.Contains(el));
 
-                if (newLanguage == "")
+                if (string.IsNullOrWhiteSpace(newLanguage))
                 {
                     MessageBox.Show("Add at least one more language to delete current one");
                     _availableLanguages.Remove(language);
                     return;
                 }
 
-                _languagesComplexity.Remove(language);
+                LanguagesComplexities.Remove(language);
 
-                if (_languagesComplexity.ContainsKey(newLanguage))
-                {
-                    SelectLanguage(newLanguage);
-                }
-                else
-                {
-                    SelectLanguage(null);
-                }
+                SelectLanguage(LanguagesComplexities.ContainsKey(newLanguage) ? newLanguage : null);
 
-                UIElement childToDelete = null;
-                foreach (var child in SPLanguages.Children)
-                {
-                    if (((LanguageControl)child).LanguageName == language)
-                    {
-                        childToDelete = (UIElement)child;
-                        continue;
-                    }
-                }
+                UIElement childToDelete = SPLanguages.Children.Cast<LanguageControl>()
+                    .FirstOrDefault(c => c.LanguageName == language);
                 SPLanguages.Children.Remove(childToDelete);
             }
 
             return BSendLanguage_Click;
         }
 
-
-        private void AddNewLanguage(string language)
+        private void AddNewLanguage(string language, bool skipChecking = false)
         {
+            if (!skipChecking && _maxComplexities != null && _maxComplexities.ContainsKey(language))
+            {
+                MessageBox.Show(this, "Languages are in readonly mode now.", "Warning", MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
             var style = FindResource("MenuStyles") as Style;
 
             var button = new LanguageControl(language, SetLanguage(language), DropLanguage(language), style);
@@ -164,13 +163,39 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
             SelectLanguage(language);
         }
 
+        private void TextBox_Validation(object sender, TextCompositionEventArgs e)
+        {
+            var regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private static void GetIndexesOf<T>(T[][] arrs, T val, out int i, out int j)
+        {
+            for (i = 0; i < arrs.Length; i++)
+            {
+                var arr = arrs[i];
+                for (j = 0; j < arr.Length; j++)
+                {
+                    if (arr[j].Equals(val)) return;
+                }
+            }
+
+            i = -1;
+            j = -1;
+        }
+
         private void TB_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (_languagesComplexity.TryGetValue(_currentLanguage, out double[] value))
+            if (LanguagesComplexities.TryGetValue(_currentLanguage, out var value))
             {
-                var senderTB = (TextBox)sender;
-                var index = _textBoxes.Select((el, index) => (el, index)).First(el => el.el.Equals(senderTB)).index;
-                value[index] = double.Parse(senderTB.Text); // We will get errors here
+                var textBox = (TextBox)sender;
+                GetIndexesOf(_textBoxes, textBox, out var i, out var j);
+
+                var max = _maxComplexities != null && _maxComplexities.TryGetValue(CurrentLanguage, out var maxes)
+                    ? maxes[i][j] : uint.MaxValue;
+
+                if (uint.TryParse(textBox.Text, out value[i][j]) && value[i][j] <= max) return;
+                textBox.Text = max.ToString();
             }
             else
             {
@@ -188,7 +213,7 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             Hidden = true;
-            this.Hide();
+            Hide();
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)

@@ -9,13 +9,14 @@ namespace ProjectDifficultyCalculator.Models
     public class LanguageSize
     {
         public string Language { get; set; }
+        public uint LinesAmount { get; set; }
+        public uint ChangeLines { get; set; }
 
-        public int LinesAmount { get; set; }
-
-        public LanguageSize(string language, int linesAmount)
+        public LanguageSize(string language, uint linesAmount, uint changeLines = 0)
         {
             Language = language;
             LinesAmount = linesAmount;
+            ChangeLines = changeLines;
         }
     }
 }
