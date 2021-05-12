@@ -20,6 +20,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ProjectDifficultyCalculator.Logic;
 using ProjectDifficultyCalculator.Logic.UFP;
 using ProjectDifficultyCalculator.Serializers;
 
@@ -30,6 +31,7 @@ namespace ProjectDifficultyCalculator
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        private const string FilePath = "diffCalcParams.json";
         private List<SelectorControl> CostDriverControls;
         private List<SelectorControl> ScaleFactorsControls;
         private List<LanguageSize> _languageSizes;
@@ -43,20 +45,13 @@ namespace ProjectDifficultyCalculator
         private string _result;
         public string Result
         {
-            get
-            {
-                if (string.IsNullOrEmpty(_result))
-                {
-                    return "No calcualtion";
-                } 
-                return _result;
-            }
+            get => string.IsNullOrEmpty(_result) ? "No calculation" : _result;
             set
             {
                 var doubleValue = double.Parse(value);
                 if (doubleValue > 0)
                 {
-                    _result = string.Format("{0:N} person-months", doubleValue);
+                    _result = $"{doubleValue:N} person-months";
                 }
                 else
                 {
@@ -70,14 +65,16 @@ namespace ProjectDifficultyCalculator
 
         public MainWindow()
         {
-            var jsonSerializer = new JsonFileSerializer<(uint, double, int[], int[], Dictionary<string, uint[][]>, Dictionary<string, uint[][]>)>();
-            (uint sloc, double brak, int[] scaleFactors, int[] costDrivers, Dictionary<string, uint[][]> slocLangsFp, Dictionary<string, uint[][]> brakLangsFp) = jsonSerializer.Load("test.json");
+            var jsonSerializer = new JsonFileSerializer<CurrentStateProperties>();
+            var (sloc, brak, scaleFactors, costDrivers,
+                slocLangsFp, brakLangsFp,
+                ufpProperties, cocomoProperties) = jsonSerializer.Load(FilePath);
 
             InitializeComponent();
             DataContext = this;
 
-            CocomoCalculator = new CocomoCalculator(CocomoDefaultPropertiesFactory.Create());
-            UfpCalculator = new UfpCalculator(UfpDefaultPropertiesFactory.Create());
+            InitCalculators(ufpProperties, cocomoProperties);
+
             CostDriverControls = new List<SelectorControl>();
             ScaleFactorsControls = new List<SelectorControl>();
             _languageSizes = new List<LanguageSize>
@@ -94,6 +91,16 @@ namespace ProjectDifficultyCalculator
         }
 
         #region Initialization
+        private void InitCalculators(UfpProperties ufpProperties, CocomoProperties cocomoProperties)
+        {
+            CocomoCalculator = new CocomoCalculator(cocomoProperties.Equals(default(CocomoProperties)) ?
+                CocomoDefaultPropertiesFactory.Create() :
+                cocomoProperties);
+            UfpCalculator = new UfpCalculator(ufpProperties.Equals(default(UfpProperties)) ?
+                UfpDefaultPropertiesFactory.Create() :
+                ufpProperties);
+        }
+
         private void InitScaleFactors(int[] scaleFactors)
         {
             int[] values = null;
@@ -421,8 +428,9 @@ namespace ProjectDifficultyCalculator
 
             if (withSave)
             {
-                var jsonSerializer = new JsonFileSerializer<(uint, double, int[], int[], Dictionary<string, uint[][]>, Dictionary<string, uint[][]>)>();
-                jsonSerializer.Save("test.json", (sloc, brak, scaleFactorsNumbers.ToArray(), costDriversNumbers.ToArray(), _slocLangsFp, _brakLangsFp));
+                var jsonSerializer = new JsonFileSerializer<CurrentStateProperties>();
+                var state = new CurrentStateProperties(sloc, brak, scaleFactorsNumbers.ToArray(), costDriversNumbers.ToArray(), _slocLangsFp, _brakLangsFp, UfpProperties, CocomoProperties);
+                jsonSerializer.Save(FilePath, state);
             }
 
             Result = CocomoCalculator.CalculateComplexityPM(sloc, brak, scaleFactors, costDrivers).ToString();
