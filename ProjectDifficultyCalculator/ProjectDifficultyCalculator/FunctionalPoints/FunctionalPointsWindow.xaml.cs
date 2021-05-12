@@ -73,7 +73,7 @@ namespace ProjectDifficultyCalculator.FunctionalPoints
                 _availableLanguages = new List<string>(_allLanguages);
             }
 
-            CBlanguage.ItemsSource = _availableLanguages;
+            CBlanguage.ItemsSource = _allLanguages;
         }
 
         private RoutedEventHandler SetLanguage(string language)
